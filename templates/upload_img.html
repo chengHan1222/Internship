@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>上傳影像檔</title>
+	</head>
+	<link rel="stylesheet" href="{{url_for('static', filename='css/upload_img.css')}}"/>
+	<script src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+
+	<body>
+		<h1>上傳影像檔</h1>
+		<div>
+			<input id="img_file" type="file" name="image_file" accept="image/*" required onchange="displayImg()" />
+			<button onclick="imgToText()">辨識</button>
+		</div>
+
+		<!-- 加入 loading spinner -->
+		<div id="loading_spinner" class="loading"></div>
+
+		<br />
+		<img id="upload_img" style="max-width: 300px; max-height: 300px" />
+
+		<div id="ocr_result_div" style="display: none">
+			<p id="ocr_word_result">辨識結果： {{ocr_word_result}}</p>
+			<p>分類結果：</p>
+			<div id="ocr_classify_result"></div>
+			<img id="ocr_image" src="{{ ocr_image }}" />
+		</div>
+	</body>
+
+	<script type="text/javascript">
+		function displayImg() {
+			var formData = new FormData();
+			var fileInput = $('#img_file')[0];
+			if (fileInput != null) {
+				formData.append('image_file', fileInput.files[0]);
+				var imageUrl = URL.createObjectURL(fileInput.files[0]);
+				$('#upload_img').attr('src', imageUrl);
+			}
+		}
+
+		function imgToText() {
+			// 顯示 loading spinner
+			$('#loading_spinner').show();
+
+			var formData = new FormData();
+			var fileInput = $('#img_file')[0];
+			if (fileInput != null) {
+				formData.append('image_file', fileInput.files[0]);
+
+				$.ajax({
+					type: 'POST',
+					url: 'http://127.0.0.1:5000/ocr/image',
+					dataType: 'json',
+					processData: false,
+					contentType: false,
+					data: formData,
+					success: function (response) {
+						// 處裡成功響應
+						$('#ocr_result_div').show();
+						$('#ocr_word_result').text('辨識結果： [' + response.ocr_word_result.join(', ') + ']');
+						$('#ocr_image').attr('src', response.img);
+
+						var $ocr_classify_result = $('#ocr_classify_result');
+						$.each(response.ocr_classify_result, (key, value) => {
+							$ocr_classify_result.append("<div><span style='font-weight: 900'><u>" + key + ':</u></span> ' + value + ' </div>');
+						});
+
+						$('#loading_spinner').hide();
+					},
+					error: function (jqXHR, textStatus, errorThrown) {
+						// 處裡錯誤響應
+						console.log(jqXHR.responseText);
+						console.log(textStatus);
+						console.log(errorThrown);
+
+						$('#ocr_result_div').show();
+						$('#ocr_word_result').text('辨識結果： 辨識失敗');
+
+						$('#loading_spinner').hide();
+					},
+				});
+
+				// fetch('http://127.0.0.1:5000/ocr/image', {
+				// 	method: 'POST',
+				// 	body: formData,
+				// })
+				// .then(response => {
+				// 	document.getElementById("ocr_result").value = '辨識結果： ' + data.ocr_result;
+				// 	document.getElementById("ocr_image").data.img;
+				// 	document.getElementById("ocr_result_div").style.display = 'block';
+				// })
+			}
+		}
+	</script>
+</html>
