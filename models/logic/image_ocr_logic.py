@@ -50,11 +50,13 @@ def img_ocr_to_text(file_bytes):
         cv2.line(img, pt3, pt4, (0, 0, 255), cv2.LINE_4)
         cv2.line(img, pt4, pt1, (0, 0, 255), cv2.LINE_4)
 
+        # 將辨識文字轉為繁體
         strText = cc.convert(line[1][0])
+        # 儲存辨識結果
         recognition_word_result.append(strText)
 
         # 繪製中文字
-        img = __putText_Chinese(img, strText, (pt1[0], pt1[1]-45), (0, 0, 255), 36)
+        img = __putText_Chinese(img, strText, (pt1[0], pt1[1]-25), (0, 0, 255), 24)
 
         # 將處理後的圖片轉換成 base64 編碼的字串
         _, img_encoded = cv2.imencode('.png', img)

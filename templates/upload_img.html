@@ -62,6 +62,7 @@
 						$('#ocr_image').attr('src', response.img);
 
 						var $ocr_classify_result = $('#ocr_classify_result');
+						$ocr_classify_result.empty(); // 移除 #ocr_classify_result 底下的所有元素
 						$.each(response.ocr_classify_result, (key, value) => {
 							$ocr_classify_result.append("<div><span style='font-weight: 900'><u>" + key + ':</u></span> ' + value + ' </div>');
 						});
